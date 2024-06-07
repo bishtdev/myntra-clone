@@ -2,39 +2,47 @@ import React from "react";
 import { useSelector } from "react-redux";
 
 const BagSummary = ({}) => {
-  const bagItems = useSelector(state => state.bag)
+  const bagItemIds = useSelector((state) => state.bag);
+  const items = useSelector((state) => state.items);
 
-  const bagSummary = {
-    totalItem: bagItems.length,
-    totalMRP: 2343,
-    totalDiscount: 999,
-    finalPayment: 1342,
-  };
+  const finalItems = items.filter((item) => {
+    const itemIndex = bagItemIds.indexOf(item.id);
+    return itemIndex >= 0;
+  });
+  const CONVENIENCE_FEES = 99;
+  let totalItem = bagItemIds.length;
+  let totalMRP = 0;
+  let totalDiscount = 0;
+
+  finalItems.forEach((bagitem) => {
+    totalMRP += bagitem.original_price;
+    totalDiscount += bagitem.original_price - bagitem.current_price;
+  });
+
+  let finalPayment = totalMRP - totalDiscount + CONVENIENCE_FEES;
 
   return (
     <div className="bag-summary">
       <div className="bag-details-container">
-        <div className="price-header">
-          PRICE DETAILS ({bagSummary.totalItem} Items){" "}
-        </div>
+        <div className="price-header">PRICE DETAILS ({totalItem}) Items </div>
         <div className="price-item">
           <span className="price-item-tag">Total MRP</span>
-          <span className="price-item-value">₹{bagSummary.totalMRP}</span>
+          <span className="price-item-value">₹{totalMRP}</span>
         </div>
         <div className="price-item">
           <span className="price-item-tag">Discount on MRP</span>
           <span className="price-item-value priceDetail-base-discount">
-            -₹{bagSummary.totalDiscount}
+            -₹{totalDiscount}
           </span>
         </div>
         <div className="price-item">
           <span className="price-item-tag">Convenience Fee</span>
-          <span className="price-item-value">₹99</span>
+          <span className="price-item-value">₹{CONVENIENCE_FEES}</span>
         </div>
         <hr />
         <div className="price-footer">
           <span className="price-item-tag">Total Amount</span>
-          <span className="price-item-value">₹{bagSummary.finalPayment}</span>
+          <span className="price-item-value">₹{finalPayment}</span>
         </div>
       </div>
       <button className="btn-place-order">
